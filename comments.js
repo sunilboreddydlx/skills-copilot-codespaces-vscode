@@ -1,16 +1,44 @@
 // create web server
-var express = require('express');
-var app = express();
+// npm install express
+// npm install body-parser
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
 
-// create file system object
-var fs = require('fs');
-
-// create body parser
-var bodyParser = require('body-parser');
+const app = express();
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-// create server
-var server = app.listen(8000, function() {
-  console.log('Server is running at http://localhost:8000');
+// get all comments
+app.get('/comments', (req, res) => {
+  fs.readFile('comments.json', (err, data) => {
+    if (err) {
+      res.status(500).send('Error reading comments.json');
+    } else {
+      res.send(data);
+    }
+  });
+});
+
+// add a comment
+app.post('/comments', (req, res) => {
+  fs.readFile('comments.json', (err, data) => {
+    if (err) {
+      res.status(500).send('Error reading comments.json');
+    } else {
+      const comments = JSON.parse(data);
+      comments.push(req.body);
+      fs.writeFile('comments.json', JSON.stringify(comments), (err) => {
+        if (err) {
+          res.status(500).send('Error writing comments.json');
+        } else {
+          res.send('Comment added!');
+        }
+      });
+    }
+  });
+});
+
+// start web server
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
 });
